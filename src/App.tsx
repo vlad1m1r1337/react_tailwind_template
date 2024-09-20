@@ -1,6 +1,10 @@
-import {Hi} from "./components/Hi.tsx";
 import mock from "./server/flights.json";
 import {useState} from "react";
+import {formatDuration} from "./utils";
+import {format} from "date-fns";
+import {ru} from "date-fns/locale";
+import {Sorting} from "./components/Sorting.tsx";
+
 function App() {
     const [sortOption, setSortOption] = useState('ascending');
 
@@ -9,89 +13,63 @@ function App() {
     };
     const obj = mock.result.flights;
     console.log(obj);
-    obj.slice(1,2).forEach((flight: any) => {
-        flight.flight.legs.forEach((leg: any, legIndex: number) => {
-            console.log(`Этап ${legIndex + 1}:`);
-            leg.segments.forEach((segment: any, segmentIndex: number) => {
-                console.log(`  Сегмент ${segmentIndex + 1}:`);
-                console.log(`    Аэропорт вылета: ${segment.departureAirport.caption}`);
-                console.log(`    Город вылета: ${segment.departureCity.caption}`);
-                console.log(`    Время вылета: ${segment.departureDate}`);
-                console.log(`    Аэропорт прилета: ${segment.arrivalAirport.caption}`);
-                console.log(`    Город прилета: ${segment.arrivalCity.caption}`);
-                console.log(`    Время прилета: ${segment.arrivalDate}`);
-                console.log(`    Номер рейса: ${segment.flightNumber}`);
-                console.log(`    Авиакомпания: ${segment.airline.caption}`);
-            });
-        });
-    });
     return (
         <>
-            <div className="flex flex-row gap-4">
-                <div className="p-4">
-                    <h2 className="py-3">Сортировать</h2>
-                    <label className="flex">
-                        <input type="radio" name="sort"/>
-                        По возрастанию цены
-                    </label>
-                    <label className="flex">
-                        <input type="radio" name="sort"/>
-                        По убыванию цены
-                    </label>
-                    <label className="flex">
-                        <input type="radio" name="sort"/>
-                        По популярности
-                    </label>
-                    <h2 className="py-3">Фильтровать</h2>
-                    <label className="flex">
-                        <input type="checkbox"/>
-                        Без пересадок
-                    </label>
-                    <label className="flex">
-                        <input type="checkbox"/>
-                        1 пересадка
-                    </label>
-                    <h2 className="py-3">Цена</h2>
-                    <label className="flex">
-                        От
-                        <input className="border" type="number"/>
-                    </label>
-                    <label className="flex mt-3">
-                        До
-                        <input className="border" type="number"/>
-                    </label>
-                    <h2 className="py-3">Авиакомпании</h2>
-                    <label className="flex">
-                        <input type="checkbox"/>
-                        Aeroflot
-                    </label>
-                    <label className="flex">
-                        <input type="checkbox"/>
-                        S7
-                    </label>
-                </div>
-                <div className="flex flex-col w-full">
-                    {obj.slice(1,5).map((flight: any) => {
+            <div className="flex flex-row">
+                <Sorting />
+                <div className="flex flex-col w-full p-4">
+                    {obj.slice(16, 40).map((flight: any) => {
                         return (
                             <div key={flight.flightToken}>
                                 <div className="flex flex-col items-end bg-sky-600 w-full p-4">
-                                    <p>{`${parseInt(flight.flight.price.passengerPrices[0].singlePassengerTotal.amount, 10)} ₽`}</p>
-                                    <p>Стоимость для одного взрослого пассажира</p>
+                                    <p className="text-white">{`${parseInt(flight.flight.price.passengerPrices[0].singlePassengerTotal.amount, 10)} ₽`}</p>
+                                    <p className="text-white">Стоимость для одного взрослого пассажира</p>
                                 </div>
-                                <p>Москва, Шереметьево (SVO) Лондон, Лондон, Хитроу (HTR) </p>
-                                <hr/>
-                                <div className="flex">
-                                    <p>20:40 18 авг. вт</p>
-                                    <p>14 ч 45 мин</p>
-                                    <p>20:40 18 авг. вт</p>
-                                </div>
-                                <div className="flex items-center">
-                                    <hr className="flex-grow border-t border-gray-300 ml-7"/>
-                                    <p className="text-yellow-500 mx-2">1 пересадка</p>
-                                    <hr className="flex-grow border-t border-gray-300 mr-7"/>
-                                </div>
-                                <p>Рейс выполняет: adsfafas</p>
-                                <hr className="border-t-[3px] my-3 border-sky-400"/>
+                                {flight.flight.legs.map((leg: any, legIndex: number) => {
+                                    return (
+                                        <div key={legIndex} className="flex flex-col p-4">
+                                            <h2 className="text-cyan-500">Этап {legIndex + 1}</h2>
+                                            {leg.segments.map((segment: any, segmentIndex: number) => {
+                                                console.log("segment", segment);
+                                                const departureFormatDate = format(segment.departureDate, 'HH:mm dd MMM EEEE', { locale: ru });
+                                                const arrivalFormatDate = format(segment.departureDate, 'HH:mm dd MMM EEEE', { locale: ru });
+                                                const [departureTime, departureDay, departureMonth, departureWeekday] = departureFormatDate.split(' ');
+                                                const [arrivalTime, arrivalDay, arrivalMonth, arrivalWeekday] = arrivalFormatDate.split(' ');
+
+                                                return (
+                                                    <div key={segmentIndex} className="flex flex-col">
+                                                        <div className="flex gap-4">
+                                                            <p>{segment.departureCity?.caption}, {segment.departureAirport.caption} <span className="text-sky-400">({segment.departureAirport.uid})</span></p>
+                                                            <p>{segment.arrivalCity?.caption}, {segment.arrivalAirport.caption} <span className="text-sky-400">({segment.arrivalAirport.uid})</span></p>
+                                                        </div>
+                                                        <hr/>
+                                                        <div className="flex gap-4 justify-between">
+                                                            <time dateTime={segment.departureDate}>
+                                                                {departureTime} <span
+                                                                className="text-sky-400">{departureDay} {departureMonth} {departureWeekday}</span>
+                                                            </time>
+                                                            <p>{formatDuration(leg.duration)}</p>
+                                                            <time dateTime={segment.departureDate}>
+                                                                {arrivalTime} <span
+                                                                className="text-sky-400">{arrivalDay} {arrivalMonth} {arrivalWeekday}</span>
+                                                            </time>
+                                                        </div>
+                                                        <div className="flex items-center">
+                                                            <hr className="flex-grow border-t border-gray-300 ml-7"/>
+                                                            {leg.segments.length - 1 ?
+                                                                <p className="text-yellow-500 mx-2">{leg.segments.length - 1} пересадка(и)</p> :
+                                                                <p className="text-yellow-500 mx-2"> без пересадок</p>
+                                                                    }
+                                                                    <hr className="flex-grow border-t border-gray-300 mr-7"/>
+                                                                </div>
+                                                                <p>{`Рейс выполняет: ${segment.airline.caption}`}</p>
+                                                        <hr className="border-t-[3px] my-3 border-sky-400 mx-[-1rem]"/>
+                                                    </div>
+                                                )
+                                            })}
+                                        </div>
+                                    )
+                                })}
                                 <button className=" h-10 w-full mt-2 mb-4 bg-yellow-500 text-white">Выбрать</button>
                             </div>
                         )
@@ -103,46 +81,3 @@ function App() {
 }
 
 export default App
-
-{/*{ obj.flights.map((flight: any) => {*/
-}
-{/*    return (*/
-}
-{/*        <div className="border-black border-2" key={flight.flightToken}>*/
-}
-{/*              <p className="text-cyan-500">{flight.flight.carrier.caption}</p>*/
-}
-{/*              <p>{flight.flight.price.total.amount}</p>*/
-}
-{/*              <p>{flight.flight.price.total.currency}</p>*/
-}
-{/*              <p>{flight.flight.legs[0].segments[0].departureCity.caption}</p>*/
-}
-{/*              <p>{flight.flight.legs[0].segments[0].arrivalCity.caption}</p>*/
-}
-{/*              <p>{flight.flight.legs[0].segments[0].departureDate}</p>*/
-}
-{/*              <p>{flight.flight.legs[0].segments[0].arrivalDate}</p>*/
-}
-{/*              <p>{flight.flight.legs[0].segments[0].airline.caption}</p>*/
-}
-{/*              <p>{flight.flight.legs[0].segments[0].aircraft.caption}</p>*/
-}
-{/*              <p>{flight.flight.legs[0].segments[0].flightNumber}</p>*/
-}
-{/*              <p>{flight.flight.legs[0].segments[0].duration}</p>*/
-}
-{/*              <p>{flight.flight.legs[0].segments[0].departureTerminal}</p>*/}
-{/*              <p>{flight.flight.legs[0].segments[0].arrivalTerminal}</p>*/}
-{/*              <p>{flight.flight.legs[0].segments[0].departureCity.caption}</p>*/}
-{/*              <p>{flight.flight.legs[0].segments[0].arrivalCity.caption}</p>*/}
-{/*              <p>{flight.flight.legs[0].segments[0].departureDate}</p>*/}
-{/*              <p>{flight.flight.legs[0].segments[0].arrivalDate}</p>*/}
-{/*              <p>{flight.flight.legs[0].segments[0].airline.caption}</p>*/}
-{/*              <p>{flight.flight.legs[0].segments[0].aircraft.caption}</p>*/}
-{/*              <p>{flight.flight.legs[0].segments[0].flightNumber}</p>*/}
-{/*              <p>{flight.flight.legs[0].segments[0].duration}</p>*/}
-{/*              <p>{flight.flight.legs[0].segments[0].departureTerminal}</p>*/}
-{/*        </div>*/}
-{/*    )*/}
-{/*})}*/}
