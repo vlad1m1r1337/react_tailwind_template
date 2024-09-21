@@ -1,22 +1,41 @@
+import {useSortStore} from "../store/useSortStore.ts";
+
 export const Sorting = () => {
+    const { sortBy, setSortBy } = useSortStore();
+
     return (
         <div>
             <div className="w-full h-8 bg-gray-300"/>
             <div className="p-4">
-                <h2 className="py-3">Сортировать</h2>
+                <h2 className="py-3 font-medium">Сортировать</h2>
                 <label className="flex">
-                    <input type="radio" name="sort"/>
+                    <input
+                        type="radio"
+                        name="sort"
+                        checked={sortBy === 'asc'}
+                        onChange={() => setSortBy('asc')}
+                    />
                     По возрастанию цены
                 </label>
                 <label className="flex">
-                    <input type="radio" name="sort"/>
+                    <input
+                        type="radio"
+                        name="sort"
+                        checked={sortBy === 'desc'}
+                        onChange={() => setSortBy('desc')}
+                    />
                     По убыванию цены
                 </label>
                 <label className="flex">
-                    <input type="radio" name="sort"/>
-                    По популярности
+                    <input
+                        type="radio"
+                        name="sort"
+                        checked={sortBy === 'time'}
+                        onChange={() => setSortBy('time')}
+                    />
+                    По времени в пути
                 </label>
-                <h2 className="py-3">Фильтровать</h2>
+                <h2 className="py-3 font-medium">Фильтровать</h2>
                 <label className="flex">
                     <input type="checkbox"/>
                     Без пересадок
@@ -34,7 +53,7 @@ export const Sorting = () => {
                     До
                     <input className="border" type="number"/>
                 </label>
-                <h2 className="py-3">Авиакомпании</h2>
+                <h2 className="py-3 font-medium">Авиакомпании</h2>
                 <label className="flex">
                     <input type="checkbox"/>
                     Aeroflot
