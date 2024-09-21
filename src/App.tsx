@@ -1,25 +1,29 @@
 import mock from "./server/flights.json";
 import {formatDate, formatDuration} from "./utils";
-import {Sorting} from "./components/Sorting.tsx";
+import {SortFilter} from "./components/SortFilter.tsx";
 import {useState} from "react";
 import {Clock4, MoveRight} from 'lucide-react';
 import {useSortStore} from "./store/useSortStore.ts";
+import {useFilterStore} from "./store/useSortStore.ts";
 import {sortFlightsByPrice} from "./ranging/sorting.ts";
+import {filterFlightsByTransfer} from "./ranging/filter_transfer.ts";
 
 
 function App() {
     const obj = mock.result.flights;
     const [flightsEnd, setFlightsEnd] = useState(30);
     const { sortBy } = useSortStore();
-    console.log(obj);
+    const { transferType } = useFilterStore();
+    // console.log(obj);
     return (
         <>
             <div className="flex flex-row">
-                <Sorting />
+                <SortFilter />
                 <div className="flex flex-col w-full p-4">
                     {obj
                         .sort((a, b) => sortFlightsByPrice(a, b, sortBy))
-                        .slice(0, flightsEnd)
+                        .filter((flight: any) => filterFlightsByTransfer([flight.flight], transferType)[0])
+                        // .slice(0, flightsEnd)
                         .map((flight: any) => {
                         return (
                             <div key={flight.flightToken}>
