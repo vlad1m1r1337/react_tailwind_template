@@ -1,6 +1,6 @@
 import {useFilterStore} from "../store/useSortStore.ts";
 
-export const FilterTransfer = () => {
+export const FilterByTransfer = () => {
     const { transferType, setTransferType } = useFilterStore();
 
     return(

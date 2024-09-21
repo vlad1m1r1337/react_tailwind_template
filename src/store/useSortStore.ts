@@ -19,3 +19,17 @@ export const useFilterStore = create<FilterState>((set) => ({
     transferType: '',
     setTransferType: (transferType) => set({ transferType }),
 }));
+
+interface FilterPriceState {
+    minPrice: number | undefined;
+    maxPrice: number | undefined;
+    setMinPrice: (minPrice: number | undefined) => void;
+    setMaxPrice: (maxPrice: number | undefined) => void;
+}
+
+export const useFilterPriceStore = create<FilterPriceState>((set) => ({
+    minPrice: undefined,
+    maxPrice: undefined,
+    setMinPrice: (minPrice) => set({ minPrice }),
+    setMaxPrice: (maxPrice) => set({ maxPrice }),
+}));

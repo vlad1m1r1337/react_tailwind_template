@@ -3,10 +3,11 @@ import {formatDate, formatDuration} from "./utils";
 import {SortFilter} from "./components/SortFilter.tsx";
 import {useState} from "react";
 import {Clock4, MoveRight} from 'lucide-react';
-import {useSortStore} from "./store/useSortStore.ts";
+import {useFilterPriceStore, useSortStore} from "./store/useSortStore.ts";
 import {useFilterStore} from "./store/useSortStore.ts";
 import {sortFlightsByPrice} from "./ranging/sorting.ts";
 import {filterFlightsByTransfer} from "./ranging/filter_transfer.ts";
+import {filterFlightsByPrice} from "./ranging/filter_price.ts";
 
 
 function App() {
@@ -14,7 +15,9 @@ function App() {
     const [flightsEnd, setFlightsEnd] = useState(30);
     const { sortBy } = useSortStore();
     const { transferType } = useFilterStore();
-    // console.log(obj);
+    const { minPrice, maxPrice } = useFilterPriceStore();
+    // console.log(obj)
+    console.log(minPrice, maxPrice)
     return (
         <>
             <div className="flex flex-row">
@@ -23,6 +26,7 @@ function App() {
                     {obj
                         .sort((a, b) => sortFlightsByPrice(a, b, sortBy))
                         .filter((flight: any) => filterFlightsByTransfer([flight.flight], transferType)[0])
+                        .filter((flight: any) => filterFlightsByPrice([flight.flight], minPrice, maxPrice)[0])
                         // .slice(0, flightsEnd)
                         .map((flight: any) => {
                         return (
@@ -74,7 +78,7 @@ function App() {
                             </div>
                         )
                     })}
-                    <button onClick={() => setFlightsEnd((prev) => prev + 1)} className="self-center border-2 border-black bg-black bg-opacity-5 mb-6 w-[200px] hover:bg-opacity-10 active:bg-opacity-15">Показать ещё</button>
+                    <button onClick={() => setFlightsEnd((prev) => prev + 1)} className="self-center border-2 border-black bg-black bg-opacity-5 mb-6 w-[200px] hover:bg-opacity-10 active:bg-opacity-15 ">Показать ещё</button>
                 </div>
             </div>
         </>
