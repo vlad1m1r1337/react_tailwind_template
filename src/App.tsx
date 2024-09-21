@@ -1,14 +1,12 @@
 import mock from "./server/flights.json";
-import {formatDuration} from "./utils";
-import {format} from "date-fns";
-import {ru} from "date-fns/locale";
+import {formatDate, formatDuration} from "./utils";
 import {Sorting} from "./components/Sorting.tsx";
 import {useState} from "react";
 import {Clock4, MoveRight} from 'lucide-react';
 
 
 function App() {
-    const obj = mock.result.flights.slice(14, 299);
+    const obj = mock.result.flights;
     const [flightsEnd, setFlightsEnd] = useState(299)
     console.log(obj);
     return (
@@ -31,49 +29,41 @@ function App() {
                                     <p className="text-white">Стоимость для одного взрослого пассажира</p>
                                 </div>
                                 {flight.flight.legs.map((leg: any, legIndex: number) => {
-                                    const hasTransfer = leg.segments.length > 1;
+                                    const firstSegment = leg.segments[0];
+                                    const lastSegment = leg.segments.at(-1);
+                                    const [departureTime, departureDay, departureMonth, departureWeekday] = formatDate(firstSegment.departureDate);
+                                    const [arrivalTime, arrivalDay, arrivalMonth, arrivalWeekday] = formatDate(lastSegment.arrivalDate);
+
                                     return (
                                         <div key={legIndex} className="flex flex-col p-4">
                                             <h2 className="text-cyan-500">Этап {legIndex + 1}</h2>
-                                            {leg.segments.map((segment: any, segmentIndex: number) => {
-                                                const departureFormatDate = format(segment.departureDate, 'HH:mm dd MMM EEEE', { locale: ru });
-                                                const arrivalFormatDate = format(segment.arrivalDate, 'HH:mm dd MMM EEEE', { locale: ru });
-                                                const [departureTime, departureDay, departureMonth, departureWeekday] = departureFormatDate.split(' ');
-                                                const [arrivalTime, arrivalDay, arrivalMonth, arrivalWeekday] = arrivalFormatDate.split(' ');
-
-                                                return (
-                                                    <div key={segmentIndex} className="flex flex-col">
-                                                        <div className="flex gap-2 ml-3">
-                                                            <p>{segment.departureCity?.caption}, {segment.departureAirport.caption} <span className="text-sky-400">({segment.departureAirport.uid})</span></p>
-                                                            <MoveRight className="text-sky-400 stroke-[1]"/>
-                                                            <p>{segment.arrivalCity?.caption}, {segment.arrivalAirport.caption} <span className="text-sky-400">({segment.arrivalAirport.uid})</span></p>
-                                                        </div>
-                                                        <hr className="my-2"/>
-                                                        <div className="flex gap-4 justify-between items-center">
-                                                            <time dateTime={segment.departureDate}>
-                                                                {departureTime} <span className="text-sky-400">{departureDay} {departureMonth} {departureWeekday}</span>
-                                                            </time>
-                                                            <div className="flex gap-2 my-3">
-                                                                <Clock4 className="stroke-[1]" />
-                                                                <p>{formatDuration(leg.duration)}</p>
-                                                            </div>
-                                                            <time dateTime={segment.arrivalDate}>
-                                                                {arrivalTime} <span className="text-sky-400">{arrivalDay} {arrivalMonth} {arrivalWeekday}</span>
-                                                            </time>
-                                                        </div>
-                                                        <div className="flex items-center">
-                                                            <hr className="flex-grow border-t border-gray-300 ml-7"/>
-                                                            {hasTransfer ?
-                                                                <p className="text-orange-500 mx-2">{leg.segments.length - 1} пересадка</p> :
-                                                                <p className="text-orange mx-2"> без пересадок</p>
-                                                            }
-                                                            <hr className="flex-grow border-t border-gray-300 mr-7"/>
-                                                        </div>
-                                                        <p>{`Рейс выполняет: ${segment.airline.caption}`}</p>
-                                                        { !( (legIndex) && (segmentIndex) ) && <hr className="border-t-[3px] my-3 border-sky-400 mx-[-1rem]"/> }
+                                                <div className="flex flex-col">
+                                                    <div className="flex gap-2 ml-3">
+                                                        <p>{firstSegment.departureCity?.caption}, {firstSegment.departureAirport.caption} <span className="text-sky-400">({firstSegment.departureAirport.uid})</span></p>
+                                                        <MoveRight className="text-sky-400 stroke-[1]"/>
+                                                        <p>{lastSegment.arrivalCity?.caption}, {lastSegment.arrivalAirport.caption} <span className="text-sky-400">({lastSegment.arrivalAirport.uid})</span></p>
                                                     </div>
-                                                )
-                                            })}
+                                                    <hr className="my-2"/>
+                                                    <div className="flex gap-4 justify-between items-center">
+                                                        <time dateTime={firstSegment.departureDate}>
+                                                            {departureTime} <span className="text-sky-400">{departureDay} {departureMonth} {departureWeekday}</span>
+                                                        </time>
+                                                        <div className="flex gap-2 my-3">
+                                                            <Clock4 className="stroke-[1]" />
+                                                            <p>{formatDuration(leg.duration)}</p>
+                                                        </div>
+                                                        <time dateTime={lastSegment.arrivalDate}>
+                                                            {arrivalTime} <span className="text-sky-400">{arrivalDay} {arrivalMonth} {arrivalWeekday}</span>
+                                                        </time>
+                                                    </div>
+                                                    <div className="flex items-center">
+                                                        <hr className="flex-grow border-t border-gray-300 ml-7"/>
+                                                        { leg.segments.length !== 1 && <p className="text-orange-500 mx-2">{`${leg.segments.length - 1} пересадка`}</p>}
+                                                        <hr className="flex-grow border-t border-gray-300 mr-7"/>
+                                                    </div>
+                                                    <p>{`Рейс выполняет: ${firstSegment.airline.caption}`}</p>
+                                                    { legIndex === 0 && <hr className="border-t-[3px] my-3 border-sky-400 mx-[-1rem]"/>}
+                                                </div>
                                         </div>
                                     )
                                 })}
