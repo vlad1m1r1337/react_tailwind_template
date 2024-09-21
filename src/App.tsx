@@ -3,11 +3,14 @@ import {formatDate, formatDuration} from "./utils";
 import {Sorting} from "./components/Sorting.tsx";
 import {useState} from "react";
 import {Clock4, MoveRight} from 'lucide-react';
+import {useSortStore} from "./store/useSortStore.ts";
+import {sortFlightsByPrice} from "./ranging/sorting.ts";
 
 
 function App() {
     const obj = mock.result.flights;
-    const [flightsEnd, setFlightsEnd] = useState(299)
+    const [flightsEnd, setFlightsEnd] = useState(30);
+    const { sortBy } = useSortStore();
     console.log(obj);
     return (
         <>
@@ -15,12 +18,8 @@ function App() {
                 <Sorting />
                 <div className="flex flex-col w-full p-4">
                     {obj
-                        // .sort((a: any, b: any) => {
-                        //     const priceA = parseInt(a.flight.price.passengerPrices[0].singlePassengerTotal.amount, 10);
-                        //     const priceB = parseInt(b.flight.price.passengerPrices[0].singlePassengerTotal.amount, 10);
-                        //     return priceA - priceB;
-                        // })
-                        .slice(14, flightsEnd)
+                        .sort((a, b) => sortFlightsByPrice(a, b, sortBy))
+                        .slice(0, flightsEnd)
                         .map((flight: any) => {
                         return (
                             <div key={flight.flightToken}>
